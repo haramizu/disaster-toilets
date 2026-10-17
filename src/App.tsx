@@ -18,6 +18,7 @@ export const App: React.FC = () => {
     keyword: '',
     prefecture: 'ALL',
     municipality: 'ALL',
+    sourceFilter: 'ALL',
     wheelchair: false,
     ostomate: false,
     baby: false,
@@ -51,6 +52,10 @@ export const App: React.FC = () => {
     const q = filterState.keyword.toLowerCase().trim();
 
     const list = allToilets.filter((t) => {
+      // Data source filter
+      if (filterState.sourceFilter === 'muni' && t.src === 'osm') return false;
+      if (filterState.sourceFilter === 'osm' && t.src !== 'osm') return false;
+
       // Prefecture
       if (filterState.prefecture !== 'ALL' && t.p !== filterState.prefecture) {
         return false;
@@ -123,6 +128,10 @@ export const App: React.FC = () => {
     return filteredToilets.filter((t) => t.o === 1).length;
   }, [filteredToilets]);
 
+  const osmCount = useMemo(() => {
+    return filteredToilets.filter((t) => t.src === 'osm').length;
+  }, [filteredToilets]);
+
   return (
     <div id="app-container">
       <Header totalCount={allToilets.length} />
@@ -170,6 +179,17 @@ export const App: React.FC = () => {
               </span>
               <span className="stats-desc">オストメイト</span>
             </div>
+            {osmCount > 0 && (
+              <>
+                <div className="stats-divider" />
+                <div className="stats-item">
+                  <span className="stats-num text-osm" id="osm-count">
+                    {osmCount.toLocaleString()}
+                  </span>
+                  <span className="stats-desc">OSM登録</span>
+                </div>
+              </>
+            )}
           </div>
 
           <DetailDrawer

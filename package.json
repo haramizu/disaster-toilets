@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "fetch": "tsx scripts/fetch_toilet_data.ts"
+    "fetch": "tsx scripts/fetch_toilet_data.ts",
+    "fetch:osm": "tsx scripts/fetch_osm_toilets.ts",
+    "fetch:all": "npm run fetch && npm run fetch:osm"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

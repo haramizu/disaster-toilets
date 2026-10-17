@@ -12,6 +12,8 @@ export interface ToiletLite {
   r: string;   // 備考
   t: string[]; // タグ
   s: string;   // 提供元
+  src?: 'muni' | 'osm'; // データソース (自治体 / OpenStreetMap)
+  osmId?: string;       // OSM ID (node/123456等)
   dist?: number; // 現在地からの距離 (km)
 }
 
@@ -19,6 +21,7 @@ export interface FilterState {
   keyword: string;
   prefecture: string;
   municipality: string;
+  sourceFilter: 'ALL' | 'muni' | 'osm'; // 自治体 / OSM 絞り込み
   wheelchair: boolean;
   ostomate: boolean;
   baby: boolean;
@@ -30,3 +33,4 @@ export interface UserLocation {
   lat: number;
   lng: number;
 }
+

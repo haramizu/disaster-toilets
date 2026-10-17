@@ -56,27 +56,49 @@ export interface DisasterToilet {
   open_hours: string;            // 利用可能時間
   remarks?: string;              // 備考（マンホールトイレ、井戸併設等）
   tags: string[];                // ["公衆トイレ", "車椅子対応", "指定避難施設" 等]
-  source_org: string;            // データ提供自治体
-  source_url: string;            // 原典オープンデータCSVのURL
+  source_org: string;            // データ提供自治体またはOpenStreetMap
+  source_url: string;            // 原典オープンデータCSVのURLまたはOSM URL
 }
 ```
 
 ---
 
-## 4. データの再収集・更新手順
+## 4. OpenStreetMap (OSM) との連携機能
 
-新しい自治体データの追加や定期更新は、TypeScriptで実装されたクローラーを1コマンドで実行できます：
+本基盤は OpenStreetMap コミュニティとの相互連携を強力にサポートしています：
+
+1. **ベースマップ切り替えコントロール**:
+   - 地図右上のフローティングメニューから、**OpenStreetMap公式標準スタイル**、**CARTO Voyager**、**国土地理院 標準地図**、**国土地理院 航空写真**をワンクリックで切り替え可能。
+2. **OpenStreetMap 閲覧・マッピング編集連携**:
+   - 各トイレの詳細画面から、**OpenStreetMap公式マップで該当地点を表示**可能。
+   - **iDエディタ**を直接起動し、OSMマッパーが現地調査・マッピング（新規登録や設備属性の補完）を即座に実施可能。
+   - **OSMタグ形式（`amenity=toilets`, `wheelchair=*`, `toilets:wheelchair=*`, `changing_table=*`, `operator=*`, `source=*` 等）**をワンクリックでクリップボードにコピーできるマッピング支援機能を搭載。
+3. **Overpass API による全国OSMトイレデータ収集・統合**:
+   - Overpass API 経由で全国の主要公衆トイレデータを自動クエリし、自治体オープンデータと統合。
+   - アプリ上で「全データ」「🏛️ 自治体公式データ」「🗺️ OpenStreetMap登録データ」を瞬時に切り替えられるセグメントフィルターを搭載。
+
+---
+
+## 5. データの再収集・更新手順
+
+新しい自治体データやOpenStreetMapの最新データの追加・更新は、TypeScriptで実装されたクローラーで実行できます：
 
 ```bash
-# 全国の自治体カタログから最新データを再収集（TypeScript版）
+# 全国の自治体カタログから最新データを再収集
 npm run fetch
+
+# OpenStreetMap (Overpass API) から最新トイレデータを再収集・統合
+npm run fetch:osm
+
+# 自治体データとOSMデータの両方を一括再収集・統合
+npm run fetch:all
 ```
 
 ---
 
-## 5. React Webアプリの起動方法
+## 6. React Webアプリの起動方法
 
-React (TypeScript + Vite) で構築されたWebアプリが付属しています。
+React (TypeScript + Vite + Leaflet) で構築されたWebアプリが付属しています。
 
 ```bash
 # 依存パッケージのインストール（初回のみ）
@@ -85,7 +107,8 @@ npm install
 # 開発サーバー起動 (ポート 3000)
 npm run dev
 
-# プロダクションビルド
+# プロダクションビルドの確認
 npm run build
 ```
 ブラウザで `http://localhost:3000` を開くと動作します。
+

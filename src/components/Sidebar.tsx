@@ -24,15 +24,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onRequestLocation,
   isLocating,
 }) => {
+  // Base toilets according to sourceFilter
+  const baseToiletsBySource = React.useMemo(() => {
+    if (filterState.sourceFilter === 'muni') {
+      return toilets.filter((t) => t.src !== 'osm');
+    }
+    if (filterState.sourceFilter === 'osm') {
+      return toilets.filter((t) => t.src === 'osm');
+    }
+    return toilets;
+  }, [toilets, filterState.sourceFilter]);
+
   // Collect prefecture counts
   const prefCounts = React.useMemo(() => {
     const counts: Record<string, number> = {};
-    toilets.forEach((t) => {
+    baseToiletsBySource.forEach((t) => {
       const p = t.p || 'その他';
       counts[p] = (counts[p] || 0) + 1;
     });
     return counts;
-  }, [toilets]);
+  }, [baseToiletsBySource]);
 
   // Sort prefectures in official order
   const sortedPrefectures = React.useMemo(() => {
@@ -50,19 +61,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const muniCounts = React.useMemo(() => {
     const counts: Record<string, number> = {};
     const relevant = filterState.prefecture === 'ALL'
-      ? toilets
-      : toilets.filter((t) => t.p === filterState.prefecture);
+      ? baseToiletsBySource
+      : baseToiletsBySource.filter((t) => t.p === filterState.prefecture);
 
     relevant.forEach((t) => {
       const m = t.l || 'その他';
       counts[m] = (counts[m] || 0) + 1;
     });
     return counts;
-  }, [toilets, filterState.prefecture]);
+  }, [baseToiletsBySource, filterState.prefecture]);
 
   const sortedMunis = React.useMemo(() => {
     return Object.keys(muniCounts).sort((a, b) => muniCounts[b] - muniCounts[a]);
   }, [muniCounts]);
+
 
   const toggleChip = (key: keyof Pick<FilterState, 'wheelchair' | 'ostomate' | 'baby' | 'park' | 'station'>) => {
     onFilterChange((prev) => ({ ...prev, [key]: !prev[key] }), false);
@@ -104,6 +116,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <Crosshair size={18} />
           {isLocating ? '取得中...' : '現在地周辺'}
+        </button>
+      </div>
+
+      {/* Data Source Segmented Control (All / Municipality / OpenStreetMap) */}
+      <div className="source-filter-container">
+        <button
+          className={`source-tab-btn ${filterState.sourceFilter === 'ALL' ? 'active' : ''}`}
+          onClick={() => onFilterChange((prev) => ({ ...prev, sourceFilter: 'ALL' }), false)}
+        >
+          全データ ({toilets.length.toLocaleString()})
+        </button>
+        <button
+          className={`source-tab-btn ${filterState.sourceFilter === 'muni' ? 'active' : ''}`}
+          onClick={() => onFilterChange((prev) => ({ ...prev, sourceFilter: 'muni' }), false)}
+        >
+          🏛️ 自治体 ({toilets.filter((t) => t.src !== 'osm').length.toLocaleString()})
+        </button>
+        <button
+          className={`source-tab-btn ${filterState.sourceFilter === 'osm' ? 'active' : ''}`}
+          onClick={() => onFilterChange((prev) => ({ ...prev, sourceFilter: 'osm' }), false)}
+        >
+          🗺️ OSM ({toilets.filter((t) => t.src === 'osm').length.toLocaleString()})
         </button>
       </div>
 
@@ -232,7 +266,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 >
                   <div className="card-header">
                     <div className="card-title">{t.n}</div>
-                    <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', gap: '4px', flexShrink: 0, alignItems: 'center' }}>
+                      {t.src === 'osm' ? (
+                        <span className="card-org card-org-osm">🗺️ OSM</span>
+                      ) : (
+                        <span className="card-org card-org-muni">🏛️ 自治体</span>
+                      )}
                       {t.p && (
                         <span
                           className="card-org"

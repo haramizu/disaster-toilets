@@ -14,7 +14,7 @@ export const Header: React.FC<HeaderProps> = ({ totalCount }) => {
         </div>
         <div>
           <h1 id="main-title">全国 災害時・公衆トイレ オープンデータ</h1>
-          <p className="subtitle">React版 自治体オープンデータ集約アプリ</p>
+          <p className="subtitle">自治体オープンデータ × OpenStreetMap 統合基盤</p>
         </div>
       </div>
       <div className="header-right">
